@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opening YouTube...</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f9f9f9; text-align: center; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #ff0000; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .container { padding: 20px; }
+        .btn { display: inline-block; margin-top: 20px; padding: 10px 20px; background: #ff0000; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="loader"></div>
+        <h2>Redirecting to App...</h2>
+        <p>If the app doesn't open automatically, click the button below:</p>
+        <a id="manual-link" href="https://www.youtube.com/@BluffyySays" class="btn">Open YouTube</a>
+    </div>
+
+    <script>
+        // CONFIGURATION: Put your video link and ID here
+        const webUrl = "https://www.youtube.com/@BluffyySays";
+        const videoId = webUrl.split('v=')[1]?.split('&')[0] || webUrl.split('/').pop();
+
+        function tryOpenApp() {
+            const isAndroid = /Android/i.test(navigator.userAgent);
+            const isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+            if (isAndroid) {
+                // This "intent" format is the best way to force open the YouTube App on Android
+                window.location.href = `intent://${webUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.google.android.youtube;end;`;
+            } else if (isiOS) {
+                // Standard deep link for iOS
+                window.location.href = `youtube://www.youtube.com/watch?v=${videoId}`;
+            }
+
+            // Fallback: If the app doesn't open within 2 seconds, redirect to the web URL
+            setTimeout(() => {
+                window.location.href = webUrl;
+            }, 2500);
+        }
+
+        // Run as soon as the page loads
+        window.onload = tryOpenApp;
+    </script>
+</body>
+</html>
