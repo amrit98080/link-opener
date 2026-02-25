@@ -4,51 +4,87 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Opening App...</title>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZZPDXZFZGC"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-ZZPDXZFZGC');
+    </script>
 </head>
-<body style="background: white;">
+<body style="background: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;">
+    
+    <div style="text-align: center;">
+        <div style="border: 4px solid #f3f3f3; border-top: 4px solid #ff0000; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 15px;"></div>
+        <p style="color: #666; font-size: 14px;">Redirecting you...</p>
+    </div>
+
+    <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const ytId = urlParams.get('v');   // For Videos
-        const ytChan = urlParams.get('c'); // For Channels (Handle or Name)
-        const igUser = urlParams.get('ig'); // For Instagram
+        const ytId = urlParams.get('v');
+        const ytChan = urlParams.get('c');
+        const igUser = urlParams.get('ig');
 
         const isAndroid = /Android/i.test(navigator.userAgent);
         const isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-        if (ytId) {
-            // YOUTUBE VIDEO
-            const webUrl = "https://www.youtube.com/watch?v=" + ytId;
-            if (isAndroid) {
-                window.location.href = "intent://www.youtube.com/watch?v=" + ytId + "#Intent;scheme=https;package=com.google.android.youtube;end;";
-            } else if (isiOS) {
-                window.location.href = "youtube://www.youtube.com/watch?v=" + ytId;
-            }
-            setTimeout(() => { window.location.href = webUrl; }, 150);
+        let redirected = false; 
 
-        } else if (ytChan) {
-            // YOUTUBE CHANNEL
-            const webUrl = "https://www.youtube.com/" + ytChan;
-            if (isAndroid) {
-                // Forces the YouTube app to open a specific channel handle/name
-                window.location.href = "intent://www.youtube.com/" + ytChan + "#Intent;scheme=https;package=com.google.android.youtube;end;";
-            } else if (isiOS) {
-                window.location.href = "youtube://www.youtube.com/" + ytChan;
-            }
-            setTimeout(() => { window.location.href = webUrl; }, 150);
+        function performRedirect() {
+            if (redirected) return;
+            redirected = true;
 
-        } else if (igUser) {
-            // INSTAGRAM PROFILE
-            const webUrl = "https://www.instagram.com/" + igUser + "/";
-            if (isAndroid) {
-                window.location.href = "intent://www.instagram.com/_u/" + igUser + "/#Intent;scheme=https;package=com.instagram.android;end;";
-            } else if (isiOS) {
-                window.location.href = "instagram://user?username=" + igUser;
-            }
-            setTimeout(() => { window.location.href = webUrl; }, 150);
+            if (ytId) {
+                const webUrl = "https://www.youtube.com/watch?v=" + ytId;
+                if (isAndroid) {
+                    window.location.href = "intent://www.youtube.com/watch?v=" + ytId + "#Intent;scheme=https;package=com.google.android.youtube;end;";
+                } else if (isiOS) {
+                    window.location.href = "youtube://www.youtube.com/watch?v=" + ytId;
+                }
+                setTimeout(() => { window.location.href = webUrl; }, 150);
 
+            } else if (ytChan) {
+                const webUrl = "https://www.youtube.com/" + ytChan;
+                if (isAndroid) {
+                    window.location.href = "intent://www.youtube.com/" + ytChan + "#Intent;scheme=https;package=com.google.android.youtube;end;";
+                } else if (isiOS) {
+                    window.location.href = "youtube://www.youtube.com/" + ytChan;
+                }
+                setTimeout(() => { window.location.href = webUrl; }, 150);
+
+            } else if (igUser) {
+                const webUrl = "https://www.instagram.com/" + igUser + "/";
+                if (isAndroid) {
+                    window.location.href = "intent://www.instagram.com/_u/" + igUser + "/#Intent;scheme=https;package=com.instagram.android;end;";
+                } else if (isiOS) {
+                    window.location.href = "instagram://user?username=" + igUser;
+                }
+                setTimeout(() => { window.location.href = webUrl; }, 150);
+
+            } else {
+                window.location.href = "https://www.youtube.com/";
+            }
+        }
+
+        const type = ytId ? "youtube_video" : (ytChan ? "youtube_channel" : (igUser ? "instagram_profile" : "none"));
+        const value = ytId || ytChan || igUser || "default";
+
+        if (type !== "none") {
+            gtag('event', 'deep_link_click', {
+                'platform': type,
+                'target': value,
+                'event_callback': function() {
+                    performRedirect();
+                }
+            });
+
+            // Backup redirect in case tracking fails or takes too long
+            setTimeout(performRedirect, 1500);
         } else {
-            // DEFAULT (If no ID found)
-            window.location.href = "https://www.youtube.com/";
+            performRedirect();
         }
     </script>
 </body>
