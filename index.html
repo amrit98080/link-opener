@@ -17,7 +17,7 @@
     
     <div style="text-align: center;">
         <div style="border: 4px solid #f3f3f3; border-top: 4px solid #ff0000; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 15px;"></div>
-        <p style="color: #666; font-size: 14px;">Redirecting you...</p>
+        <p style="color: #666; font-size: 14px;">Redirecting you to the app...</p>
     </div>
 
     <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
@@ -27,6 +27,7 @@
         const ytId = urlParams.get('v');
         const ytChan = urlParams.get('c');
         const igUser = urlParams.get('ig');
+        const contentTitle = urlParams.get('title') || "Unknown_Content"; // Capture Title from Bot
 
         const isAndroid = /Android/i.test(navigator.userAgent);
         const isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -37,6 +38,7 @@
             if (redirected) return;
             redirected = true;
 
+            // --- 📺 YOUTUBE VIDEO LOGIC ---
             if (ytId) {
                 const webUrl = "https://www.youtube.com/watch?v=" + ytId;
                 if (isAndroid) {
@@ -46,6 +48,7 @@
                 }
                 setTimeout(() => { window.location.href = webUrl; }, 150);
 
+            // --- 📺 YOUTUBE CHANNEL LOGIC ---
             } else if (ytChan) {
                 const webUrl = "https://www.youtube.com/" + ytChan;
                 if (isAndroid) {
@@ -55,6 +58,7 @@
                 }
                 setTimeout(() => { window.location.href = webUrl; }, 150);
 
+            // --- 📸 INSTAGRAM LOGIC ---
             } else if (igUser) {
                 const webUrl = "https://www.instagram.com/" + igUser + "/";
                 if (isAndroid) {
@@ -64,24 +68,27 @@
                 }
                 setTimeout(() => { window.location.href = webUrl; }, 150);
 
+            // --- 🏠 FALLBACK ---
             } else {
                 window.location.href = "https://www.youtube.com/";
             }
         }
 
+        // --- 📊 ENHANCED ANALYTICS ---
         const type = ytId ? "youtube_video" : (ytChan ? "youtube_channel" : (igUser ? "instagram_profile" : "none"));
         const value = ytId || ytChan || igUser || "default";
 
         if (type !== "none") {
             gtag('event', 'deep_link_click', {
                 'platform': type,
-                'target': value,
+                'target_id': value,
+                'content_name': contentTitle, // This shows the video title in your reports!
                 'event_callback': function() {
                     performRedirect();
                 }
             });
 
-            // Backup redirect in case tracking fails or takes too long
+            // Backup redirect after 1.5s if tracking takes too long
             setTimeout(performRedirect, 1500);
         } else {
             performRedirect();
