@@ -24,21 +24,22 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const ytId = urlParams.get('v');
-        const ytChan = urlParams.get('c');
-        const igUser = urlParams.get('ig');
-        const contentTitle = urlParams.get('title') || "Unknown_Content"; // Capture Title from Bot
+        const ytId = urlParams.get('v');      // YouTube Video
+        const ytChan = urlParams.get('c');    // YouTube Channel
+        const igUser = urlParams.get('ig');    // Instagram Profile/Reel
+        const contentTitle = urlParams.get('title') || "Unknown_Content";
 
         const isAndroid = /Android/i.test(navigator.userAgent);
         const isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-
+        
+        // Safety Switch: Prevents double-redirect glitches
         let redirected = false; 
 
         function performRedirect() {
             if (redirected) return;
             redirected = true;
 
-            // --- 📺 YOUTUBE VIDEO LOGIC ---
+            // 1. YOUTUBE VIDEO
             if (ytId) {
                 const webUrl = "https://www.youtube.com/watch?v=" + ytId;
                 if (isAndroid) {
@@ -48,7 +49,7 @@
                 }
                 setTimeout(() => { window.location.href = webUrl; }, 150);
 
-            // --- 📺 YOUTUBE CHANNEL LOGIC ---
+            // 2. YOUTUBE CHANNEL
             } else if (ytChan) {
                 const webUrl = "https://www.youtube.com/" + ytChan;
                 if (isAndroid) {
@@ -58,7 +59,7 @@
                 }
                 setTimeout(() => { window.location.href = webUrl; }, 150);
 
-            // --- 📸 INSTAGRAM LOGIC ---
+            // 3. INSTAGRAM
             } else if (igUser) {
                 const webUrl = "https://www.instagram.com/" + igUser + "/";
                 if (isAndroid) {
@@ -68,13 +69,13 @@
                 }
                 setTimeout(() => { window.location.href = webUrl; }, 150);
 
-            // --- 🏠 FALLBACK ---
+            // 4. FALLBACK
             } else {
                 window.location.href = "https://www.youtube.com/";
             }
         }
 
-        // --- 📊 ENHANCED ANALYTICS ---
+        // --- 📊 ANALYTICS TRACKING ---
         const type = ytId ? "youtube_video" : (ytChan ? "youtube_channel" : (igUser ? "instagram_profile" : "none"));
         const value = ytId || ytChan || igUser || "default";
 
@@ -82,13 +83,10 @@
             gtag('event', 'deep_link_click', {
                 'platform': type,
                 'target_id': value,
-                'content_name': contentTitle, // This shows the video title in your reports!
-                'event_callback': function() {
-                    performRedirect();
-                }
+                'content_name': contentTitle, 
+                'event_callback': function() { performRedirect(); }
             });
-
-            // Backup redirect after 1.5s if tracking takes too long
+            // Backup redirect if analytics is slow
             setTimeout(performRedirect, 1500);
         } else {
             performRedirect();
